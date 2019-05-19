@@ -38,6 +38,7 @@ public class BleServerActivity extends Activity {
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser; // BLE广播
     private BluetoothGattServer mBluetoothGattServer; // BLE服务端
 
+    private int serverVal = 0;
     // BLE广播Callback
     private AdvertiseCallback mAdvertiseCallback = new AdvertiseCallback() {
         @Override
@@ -65,11 +66,23 @@ public class BleServerActivity extends Activity {
             logTv(String.format(status == 0 ? "添加服务[%s]成功" : "添加服务[%s]失败,错误码:" + status, service.getUuid()));
         }
 
+        /**
+         * 从客户端读取数据
+         * @param device
+         * @param requestId
+         * @param offset
+         * @param characteristic
+         */
         @Override
         public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattCharacteristic characteristic) {
             Log.i(TAG, String.format("onCharacteristicReadRequest:%s,%s,%s,%s,%s", device.getName(), device.getAddress(), requestId, offset, characteristic.getUuid()));
             String response = "CHAR_" + (int) (Math.random() * 100); //模拟数据
-
+            if (serverVal==0) {
+                serverVal = (int) (Math.random() * 100);
+            }else {
+                serverVal++;
+            }
+            response = String.valueOf(serverVal);
             mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, response.getBytes());// 响应客户端
             logTv("客户端读取Characteristic[" + characteristic.getUuid() + "]:\n" + response);
         }
@@ -83,7 +96,7 @@ public class BleServerActivity extends Activity {
             Log.i(TAG, String.format("onCharacteristicWriteRequest:%s,%s,%s,%s,%s,%s,%s,%s", device.getName(), device.getAddress(), requestId, characteristic.getUuid(),
                     preparedWrite, responseNeeded, offset, String.valueOf(intValue)));
             mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, String.valueOf(intValue).getBytes());// 响应客户端
-            logTv("客户端写入Characteristic[" + characteristic.getUuid() + "]:\n" + requestStr);
+            logTv("客户端写入Characteristic[" + characteristic.getUuid() + "]:\n" + intValue);
         }
 
         @Override
