@@ -15,10 +15,12 @@ import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.ParcelUuid;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.widget.TextView;
 
 import java.util.Arrays;
@@ -79,12 +81,11 @@ public class BleServerActivity extends Activity {
             String response = "CHAR_" + (int) (Math.random() * 100); //模拟数据
             if (serverVal==0) {
                 serverVal = (int) (Math.random() * 100);
-            }else {
-                serverVal++;
             }
             response = String.valueOf(serverVal);
             mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, response.getBytes());// 响应客户端
             logTv("客户端读取Characteristic[" + characteristic.getUuid() + "]:\n" + response);
+//            serverVal++;
         }
 
         @Override
@@ -92,11 +93,11 @@ public class BleServerActivity extends Activity {
             // 获取客户端发过来的数据
             String requestStr = new String(requestBytes);
             Integer intValue = Integer.parseInt(requestStr);
-            intValue++;
+            serverVal= ++intValue;
             Log.i(TAG, String.format("onCharacteristicWriteRequest:%s,%s,%s,%s,%s,%s,%s,%s", device.getName(), device.getAddress(), requestId, characteristic.getUuid(),
-                    preparedWrite, responseNeeded, offset, String.valueOf(intValue)));
-            mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, String.valueOf(intValue).getBytes());// 响应客户端
-            logTv("客户端写入Characteristic[" + characteristic.getUuid() + "]:\n" + intValue);
+                    preparedWrite, responseNeeded, offset, String.valueOf(serverVal)));
+            mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, String.valueOf(serverVal).getBytes());// 响应客户端
+            logTv("客户端写入Characteristic[" + characteristic.getUuid() + "]:\n" + serverVal);
         }
 
         @Override
@@ -116,7 +117,7 @@ public class BleServerActivity extends Activity {
             Integer intValue = Integer.parseInt(valueStr);
             intValue++;
             mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, String.valueOf(intValue).getBytes());// 响应客户端
-            logTv("客户端写入Descriptor[" + descriptor.getUuid() + "]:\n" + valueStr);
+            logTv("客户端写入Descriptor[" + descriptor.getUuid() + "]:\n" + intValue);
 
             // 简单模拟通知客户端Characteristic变化
             if (Arrays.toString(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE).equals(valueStr)) { //是否开启通知
@@ -200,6 +201,19 @@ public class BleServerActivity extends Activity {
         mBluetoothGattServer.addService(service);
     }
 
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode==KeyEvent.KEYCODE_BACK){
+            Intent home = new Intent(Intent.ACTION_MAIN);
+            home.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            home.addCategory(Intent.CATEGORY_HOME);
+            startActivity(home);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -216,7 +230,7 @@ public class BleServerActivity extends Activity {
             @Override
             public void run() {
                 APP.toast(msg, 0);
-                mTips.append(msg + "\n\n");
+                mTips.setText(msg + "\n\n");
             }
         });
     }
