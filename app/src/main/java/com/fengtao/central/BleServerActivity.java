@@ -16,12 +16,16 @@ import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.content.Context;
 import android.content.Intent;
+import android.media.audiofx.AudioEffect;
 import android.os.Bundle;
 import android.os.ParcelUuid;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.widget.ScrollView;
 import android.widget.TextView;
+
+import com.fengtao.central.util.DateUtil;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -37,6 +41,7 @@ public class BleServerActivity extends Activity {
     public static final UUID UUID_CHAR_WRITE = UUID.fromString("12000000-0000-0000-0000-000000000000");
     private static final String TAG = BleServerActivity.class.getSimpleName();
     private TextView mTips;
+    private ScrollView scrollView;
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser; // BLE广播
     private BluetoothGattServer mBluetoothGattServer; // BLE服务端
 
@@ -78,11 +83,10 @@ public class BleServerActivity extends Activity {
         @Override
         public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattCharacteristic characteristic) {
             Log.i(TAG, String.format("onCharacteristicReadRequest:%s,%s,%s,%s,%s", device.getName(), device.getAddress(), requestId, offset, characteristic.getUuid()));
-            String response = "CHAR_" + (int) (Math.random() * 100); //模拟数据
             if (serverVal==0) {
                 serverVal = (int) (Math.random() * 100);
             }
-            response = String.valueOf(serverVal);
+            String response = String.valueOf(serverVal);
             mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, response.getBytes());// 响应客户端
             logTv("客户端读取Characteristic[" + characteristic.getUuid() + "]:\n" + response);
 //            serverVal++;
@@ -161,7 +165,7 @@ public class BleServerActivity extends Activity {
         BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
 //        BluetoothAdapter bluetoothAdapter = bluetoothManager.getAdapter();
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
+        scrollView = findViewById(R.id.content_scroller);
         // ============启动BLE蓝牙广播(广告) =================================================================================
         //广播设置(必须)
         AdvertiseSettings settings = new AdvertiseSettings.Builder()
@@ -230,7 +234,8 @@ public class BleServerActivity extends Activity {
             @Override
             public void run() {
                 APP.toast(msg, 0);
-                mTips.setText(msg + "\n\n");
+                mTips.append(DateUtil.getCurrDateStr()+msg + "\n\n");
+                scrollView.fullScroll(ScrollView.FOCUS_DOWN);
             }
         });
     }
