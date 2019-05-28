@@ -1,4 +1,4 @@
-package com.fengtao.central;
+package com.fengtao.client;
 
 import android.annotation.SuppressLint;
 import android.app.Application;

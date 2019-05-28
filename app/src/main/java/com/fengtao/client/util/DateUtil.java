@@ -1,4 +1,4 @@
-package com.fengtao.central.util;
+package com.fengtao.client.util;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

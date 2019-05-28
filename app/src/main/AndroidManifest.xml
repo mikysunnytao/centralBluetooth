@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.fengtao.central">
+    package="com.fengtao.client">
 
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
@@ -12,15 +12,20 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:name=".APP"
+        android:name="com.fengtao.client.APP"
         android:theme="@style/AppTheme">
-        <activity android:name=".BleServerActivity">
+        <activity android:name=".activity.BleClientActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".activity.OnePixelActivity"></activity>
+        <service android:name="com.fengtao.client.service.ble.BleBindService" android:enabled="true"></service>
+        <service android:name="com.fengtao.client.service.ble.BleBackgroundService" android:enabled="true"></service>
+        <service android:name=".service.guard.LocalService" android:enabled="true"></service>
+        <service android:name=".service.guard.RemoteService" android:process=":remote" android:enabled="true"></service>
     </application>
 
 </manifest>
